@@ -84,17 +84,36 @@ purchaseCount: 1 } }
       res.send(result)
     })
 
-    // All food
-    app.get('/allfoods', async (req, res) => {
-      const { searchParams } = req.query;
-      let query = {};
-      if (searchParams) {
-        query = { name: { $regex: searchParams, $options: "i" } };
-      }
+   
 
-      const result = await resCollection.find(query).sort({ purchaseCount: -1 }).toArray();
-      res.send(result)
-    })
+app.get('/allfoods', async (req, res) => {
+  const { searchParams, sort } = req.query;
+  let query = {};
+
+  // Search
+  if (searchParams) {
+    query = { name: { $regex: searchParams, $options: "i" } };
+  }
+
+  let sortQuery;
+
+  // 
+  if (sort === 'asc') {
+    sortQuery = { price: 1 }; // Low to High
+  } else if (sort === 'desc') {
+    sortQuery = { price: -1 }; // High to Low
+  } else {
+    // Default: purchaseCount descending
+    sortQuery = { purchaseCount: -1 };
+  }
+
+  const result = await resCollection.find(query).sort(sortQuery).toArray();
+  res.send(result);
+});
+
+
+
+
 
     // details
     app.get('/allfoods/:id', async (req, res) => {
